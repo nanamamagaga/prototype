@@ -21,14 +21,20 @@ class Memo(db.Model):
 def home():
     return render_template('home.html')
 
+@app.route('/hi')
+def hi():
+    return render_template('db.html')
 
 @app.route('/about')
 def about():
     return '이것은 마이 메모 앱의 소개 페이지'
 
+
+# CRUD
 with app.app_context():
     db.create_all()
     
+# C
 @app.route('/memos/create', methods=['POST'])
 def create_memo():
     title = request.json['title']
@@ -38,11 +44,14 @@ def create_memo():
     db.session.commit()
     return jsonify({'message': 'Memo created'}), 201
 
+# R
 @app.route('/memos', methods=['GET'])
 def list_memos():
     memos = Memo.query.all()
-    return jsonify({'id':memo.id, 'title':memo.title, 'content':memo.content} for memo in memos), 200
+    memos_list = [{'id': memo.id, 'title': memo.title, 'content': memo.content} for memo in memos]
+    return jsonify(memos_list), 200
 
+# U
 @app.route('/memos/update/<int:id>', methods=['PUT'])
 def update_memo(id):
     memo = Memo.query.filter_by(id=id).first()
@@ -53,7 +62,8 @@ def update_memo(id):
         return jsonify({'message':'Memo updated'}), 200
     else:
         abort(404, description="Memo not found")
-        
+      
+# D  
 @app.route('/memos/delete/<int:id>', methods=['DELETE'])
 def delete_memo(id):
     memo = Memo.query.filter_by(id=id).first()
